@@ -6,7 +6,6 @@ import com.degoos.javayoutubedownloader.decoder.MultipleDecoderMethod;
 import com.degoos.javayoutubedownloader.stream.YoutubeVideo;
 import com.degoos.javayoutubedownloader.tag.ITagMap;
 import com.degoos.javayoutubedownloader.util.Validate;
-import com.sun.istack.internal.NotNull;
 
 import java.io.IOException;
 import java.net.URL;
@@ -53,7 +52,7 @@ public class JavaYoutubeDownloader {
 	 * @return the video, or null of an exception is thrown.
 	 * @see #decode(URL, MultipleDecoderMethod, String...)
 	 */
-	public static YoutubeVideo decodeOrNull(@NotNull String url, @NotNull MultipleDecoderMethod method, @NotNull String... decoders) {
+	public static YoutubeVideo decodeOrNull(String url, MultipleDecoderMethod method, String... decoders) {
 		try {
 			return decode(url, method, decoders);
 		} catch (Exception ex) {
@@ -72,7 +71,7 @@ public class JavaYoutubeDownloader {
 	 * @return the video, or null of an exception is thrown.
 	 * @see #decode(URL, MultipleDecoderMethod, String...)
 	 */
-	public static YoutubeVideo decodeOrNull(@NotNull URL url, @NotNull MultipleDecoderMethod method, @NotNull String... decoders) {
+	public static YoutubeVideo decodeOrNull(URL url, MultipleDecoderMethod method, String... decoders) {
 		try {
 			return decode(url, method, decoders);
 		} catch (Exception ex) {
@@ -91,7 +90,7 @@ public class JavaYoutubeDownloader {
 	 * @return the video, or null of an exception is thrown.
 	 * @see #decode(URL, MultipleDecoderMethod, String...)
 	 */
-	public static YoutubeVideo decode(@NotNull String url, @NotNull MultipleDecoderMethod method, @NotNull String... decoders) throws IOException {
+	public static YoutubeVideo decode(String url, MultipleDecoderMethod method, String... decoders) throws IOException {
 		Validate.notNull(url, "url cannot be null!");
 		return decode(new URL(url), method, decoders);
 	}
@@ -119,7 +118,7 @@ public class JavaYoutubeDownloader {
 	 * @throws IllegalArgumentException if any of the arguments is null or if the decoder list is empty.
 	 * @throws IllegalStateException    if none of the decoders was able to create a {@link YoutubeVideo} instance.
 	 */
-	public static YoutubeVideo decode(@NotNull URL url, @NotNull MultipleDecoderMethod method, @NotNull String... decoders) {
+	public static YoutubeVideo decode(URL url, MultipleDecoderMethod method, String... decoders) {
 		Validate.notNull(url, "url cannot be null!");
 		Validate.notNull(method, "method cannot be null!");
 		Validate.notNull(decoders, "decoders cannot be null!");

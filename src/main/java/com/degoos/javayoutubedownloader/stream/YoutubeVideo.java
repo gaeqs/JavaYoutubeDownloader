@@ -1,7 +1,6 @@
 package com.degoos.javayoutubedownloader.stream;
 
 import com.degoos.javayoutubedownloader.util.Validate;
-import com.sun.istack.internal.NotNull;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -38,7 +37,7 @@ public class YoutubeVideo {
 	 * @param author        the author.
 	 * @param streamOptions the stream list.
 	 */
-	public YoutubeVideo(@NotNull String title, String author, List<StreamOption> streamOptions) {
+	public YoutubeVideo(String title, String author, List<StreamOption> streamOptions) {
 		Validate.notNull(title, "Title cannot be null!");
 		this.title = title;
 		this.author = author;

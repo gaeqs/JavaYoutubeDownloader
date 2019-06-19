@@ -3,7 +3,6 @@ package com.degoos.javayoutubedownloader.stream;
 import com.degoos.javayoutubedownloader.tag.StreamType;
 import com.degoos.javayoutubedownloader.util.HTMLUtils;
 import com.degoos.javayoutubedownloader.util.Validate;
-import com.sun.istack.internal.NotNull;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.net.URL;
@@ -24,7 +23,7 @@ public class StreamOption {
 	 * @param url  the decoded url.
 	 * @param type the stream type.
 	 */
-	public StreamOption(@NotNull URL url, @NotNull StreamType type) {
+	public StreamOption(URL url, StreamType type) {
 		Validate.notNull(url, "Url cannot be null!");
 		Validate.notNull(type, "Type cannot be null!");
 		this.url = url;
@@ -43,7 +42,8 @@ public class StreamOption {
 	/**
 	 * Returns the {@link StreamType} of the stream. This object can give us information about the stream,
 	 * such as the video and audio quality, the format, or the container.
-	 * 	 *
+	 * *
+	 *
 	 * @return the {@link StreamType}
 	 */
 	public StreamType getType() {

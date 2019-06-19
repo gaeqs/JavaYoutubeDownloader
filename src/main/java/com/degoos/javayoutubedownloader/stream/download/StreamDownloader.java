@@ -4,7 +4,6 @@ import com.degoos.javayoutubedownloader.exception.DownloadException;
 import com.degoos.javayoutubedownloader.stream.StreamOption;
 import com.degoos.javayoutubedownloader.util.HTMLUtils;
 import com.degoos.javayoutubedownloader.util.Validate;
-import com.sun.istack.internal.NotNull;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -29,7 +28,7 @@ public class StreamDownloader implements Runnable {
 	private int length, count;
 	private DownloadStatus status;
 
-	public StreamDownloader(@NotNull StreamOption option, @NotNull File target, StreamDownloaderNotifier notifier) {
+	public StreamDownloader(StreamOption option, File target, StreamDownloaderNotifier notifier) {
 		Validate.notNull(option, "Option cannot be null!");
 		Validate.notNull(target, "Target cannot be null!");
 		this.option = option;

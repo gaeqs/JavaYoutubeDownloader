@@ -6,8 +6,6 @@ import com.degoos.javayoutubedownloader.decrypt.HTML5SignatureDecrypt;
 import com.degoos.javayoutubedownloader.decrypt.SignatureDecrypt;
 import com.degoos.javayoutubedownloader.exception.StreamEncodedException;
 import com.degoos.javayoutubedownloader.util.Validate;
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
 
 import java.net.URI;
 import java.net.URL;
@@ -34,7 +32,7 @@ public class EncodedStream {
 	 * @param iTag the iTag.
 	 * @param url  the url.
 	 */
-	public EncodedStream(@NotNull int iTag, @NotNull String url) {
+	public EncodedStream(int iTag, String url) {
 		this(iTag, url, null);
 	}
 
@@ -45,7 +43,7 @@ public class EncodedStream {
 	 * @param url       the url.
 	 * @param signature the signature code, or null.
 	 */
-	public EncodedStream(@NotNull int iTag, @NotNull String url, String signature) {
+	public EncodedStream(int iTag, String url, String signature) {
 		Validate.notNull(iTag, "iTag cannot be null!");
 		Validate.notNull(url, "url cannot be null!");
 		this.iTag = iTag;
@@ -116,7 +114,7 @@ public class EncodedStream {
 	 *                        decoded stream will be deleted, and this method will return false.
 	 * @return whether the decode was successful.
 	 */
-	public boolean decode(@Nullable URI playerUri, boolean checkConnection) {
+	public boolean decode(URI playerUri, boolean checkConnection) {
 		if (decodedStream != null) return true;
 		boolean created;
 		if (!hasSignature()) {
@@ -149,7 +147,7 @@ public class EncodedStream {
 		}
 	}
 
-	private boolean decodeComplex(@Nullable URI playerUri) {
+	private boolean decodeComplex(URI playerUri) {
 		Decrypt decrypt;
 		if (playerUri == null)
 			decrypt = new SignatureDecrypt(signature);
