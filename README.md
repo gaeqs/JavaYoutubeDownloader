@@ -24,7 +24,7 @@ You can easily install JYD using our maven repository:
         <artifactId>JavaYoutubeDownloader</artifactId>
         <version>1.0-SNAPSHOT</version>
     </dependency>
-    </dependencies>
+</dependencies>
 ```
 
 <h2><b>Usage</b></h2>
