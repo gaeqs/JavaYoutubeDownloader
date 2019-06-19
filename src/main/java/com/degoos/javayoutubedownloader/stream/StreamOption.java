@@ -47,7 +47,6 @@ public class StreamOption {
 	 * @return the {@link StreamType}
 	 */
 	public StreamType getType() {
-		if (type == null) System.out.println("URL: " + url);
 		return type;
 	}
 

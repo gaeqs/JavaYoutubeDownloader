@@ -5,8 +5,6 @@ import com.degoos.javayoutubedownloader.stream.EncodedStream;
 import com.degoos.javayoutubedownloader.stream.YoutubeVideo;
 import com.degoos.javayoutubedownloader.util.EncodedStreamUtils;
 import com.degoos.javayoutubedownloader.util.HTMLUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.net.URI;
@@ -102,7 +100,7 @@ public class HTMLDecoder implements Decoder {
 		if (titleMatch.find()) {
 			String sline = titleMatch.group(1);
 			String name = sline.replaceFirst("<meta name=\"title\" content=", "").trim();
-			return StringEscapeUtils.unescapeHtml4(StringUtils.strip(name, "\">"));
+			return name.substring(1, name.length() - 2);
 		}
 		return url.toString();
 	}
