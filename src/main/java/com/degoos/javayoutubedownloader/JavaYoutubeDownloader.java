@@ -7,7 +7,7 @@ import com.degoos.javayoutubedownloader.stream.YoutubeVideo;
 import com.degoos.javayoutubedownloader.tag.ITagMap;
 import com.degoos.javayoutubedownloader.util.Validate;
 
-import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 
@@ -32,7 +32,7 @@ public class JavaYoutubeDownloader {
 	}
 
 	/**
-	 * Returns the  {@link DecoderManager}. With it you can get or add {@link Decoder}s.
+	 * Returns the {@link DecoderManager}. With it you can get or add {@link Decoder}s.
 	 *
 	 * @return the {@link DecoderManager}.
 	 * @see Decoder
@@ -43,7 +43,7 @@ public class JavaYoutubeDownloader {
 	}
 
 	/**
-	 * Does the same as {@link #decode(String, MultipleDecoderMethod, String...)}, but it returns {@link null}
+	 * It does the same as {@link #decode(String, MultipleDecoderMethod, String...)}, but it returns {@code null}
 	 * if a exception is thrown.
 	 *
 	 * @param url      the url.
@@ -62,7 +62,7 @@ public class JavaYoutubeDownloader {
 	}
 
 	/**
-	 * Does the same as {@link #decode(URL, MultipleDecoderMethod, String...)}, but it returns {@link null}
+	 *  It does the same as {@link #decode(URL, MultipleDecoderMethod, String...)}, but it returns {@code null}
 	 * if a exception is thrown.
 	 *
 	 * @param url      the url.
@@ -81,16 +81,17 @@ public class JavaYoutubeDownloader {
 	}
 
 	/**
-	 * Does the same as {@link #decode(URL, MultipleDecoderMethod, String...)}, but parses the give url
+	 * It does the same as {@link #decode(URL, MultipleDecoderMethod, String...)}, but it parses the given url
 	 * to an {@link URL} instance before.
 	 *
 	 * @param url      the url.
 	 * @param method   the method to use.
 	 * @param decoders the decoders to use.
 	 * @return the video, or null of an exception is thrown.
+	 * @throws MalformedURLException whether the url is malformed.
 	 * @see #decode(URL, MultipleDecoderMethod, String...)
 	 */
-	public static YoutubeVideo decode(String url, MultipleDecoderMethod method, String... decoders) throws IOException {
+	public static YoutubeVideo decode(String url, MultipleDecoderMethod method, String... decoders) throws MalformedURLException {
 		Validate.notNull(url, "url cannot be null!");
 		return decode(new URL(url), method, decoders);
 	}

@@ -97,6 +97,7 @@ public class StreamDownloader implements Runnable {
 					throw new DownloadException("Thread interrupted");
 			}
 			bufferedInputStream.close();
+			if (notifier != null) notifier.onFinish(this);
 		} catch (Exception ex) {
 			if (notifier != null)
 				notifier.onError(this, ex);

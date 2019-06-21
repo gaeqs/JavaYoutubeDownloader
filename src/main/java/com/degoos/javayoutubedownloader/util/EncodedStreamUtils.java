@@ -14,7 +14,7 @@ public class EncodedStreamUtils {
 	 * @param encodedString the encoded stream.
 	 * @param collection    the collection.
 	 * @param urlEncoding   the url encoding. UTF-8 is used by default.
-	 * @throws UnsupportedEncodingException
+	 * @throws UnsupportedEncodingException whether the encoding is not supported.
 	 */
 	public static void addEncodedStreams(String encodedString, Collection<EncodedStream> collection, String urlEncoding) throws UnsupportedEncodingException {
 		String[] streams = encodedString.trim().split(",");
