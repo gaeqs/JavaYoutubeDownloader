@@ -30,7 +30,7 @@ You can easily install JYD using our maven repository:
 <h2><b>Usage</b></h2>
 
 Using JYD is very easy! This is an example of a method that downloads a video and saves the option with
-the better video quality into a file:
+the best video quality into a file:
 
 ```java
 public static boolean download(String url, File folder) {
