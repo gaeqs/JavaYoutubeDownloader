@@ -6,15 +6,14 @@ import com.degoos.javayoutubedownloader.stream.YoutubeVideo;
 import com.degoos.javayoutubedownloader.util.EncodedStreamUtils;
 import com.degoos.javayoutubedownloader.util.HTMLUtils;
 import com.degoos.javayoutubedownloader.util.IdExtractor;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class represents a decoder that uses the Youtube's embedded API to decode stream options.
@@ -33,6 +32,10 @@ public class EmbeddedDecoder implements Decoder {
 	public static final String AUTHOR_PARAMETER = "author";
 	public static final String MUXED_STREAM_LIST_PARAMETER = "url_encoded_fmt_stream_map";
 	public static final String ADAPTIVE_STREAM_LIST_PARAMETER = "adaptive_fmts";
+
+	public static final String PLAYER_RESPONSE_LIST_PARAMETER = "player_response";
+	public static final String STREAMING_DATA_JSON_PARAMETER = "streamingData";
+	public static final String FORMATS_JSON_PARAMETER = "formats";
 
 	private String urlEncoding;
 	private String getVideoUrl;
@@ -69,15 +72,37 @@ public class EmbeddedDecoder implements Decoder {
 		Map<String, String> queryData = getQueryMap(query);
 		checkExceptions(queryData);
 
-		String title = decode(queryData.get(TITLE_PARAMETER));
-		String author = decode(queryData.get(AUTHOR_PARAMETER));
+		queryData.forEach((key, value) -> System.out.println(key + "=" + value));
+
+		String title = queryData.containsKey(TITLE_PARAMETER) ? decode(queryData.get(TITLE_PARAMETER)) : "null";
+		String author = queryData.containsKey(AUTHOR_PARAMETER) ? decode(queryData.get(AUTHOR_PARAMETER)) : "null";
 		YoutubeVideo video = new YoutubeVideo(title, author);
 
-		String encodedMuxedStreamList = decode(queryData.get(MUXED_STREAM_LIST_PARAMETER));
-		String encodedAdaptiveStreamList = decode(queryData.get(ADAPTIVE_STREAM_LIST_PARAMETER));
 		List<EncodedStream> encodedStreams = new LinkedList<>();
-		EncodedStreamUtils.addEncodedStreams(encodedMuxedStreamList, encodedStreams, urlEncoding);
-		EncodedStreamUtils.addEncodedStreams(encodedAdaptiveStreamList, encodedStreams, urlEncoding);
+
+		//Player response data.
+		if (queryData.containsKey(PLAYER_RESPONSE_LIST_PARAMETER)) {
+			JSONObject obj = new JSONObject(decode(queryData.get(PLAYER_RESPONSE_LIST_PARAMETER)));
+			if (obj.has(STREAMING_DATA_JSON_PARAMETER)) {
+				obj = obj.getJSONObject(STREAMING_DATA_JSON_PARAMETER);
+				if (obj.has(FORMATS_JSON_PARAMETER)) {
+					addJSONStreams(obj.getJSONArray(FORMATS_JSON_PARAMETER), encodedStreams);
+				}
+			}
+		}
+
+		//Muxed stream data.
+		if (queryData.containsKey(MUXED_STREAM_LIST_PARAMETER)) {
+			String encodedMuxedStreamList = decode(queryData.get(MUXED_STREAM_LIST_PARAMETER));
+			EncodedStreamUtils.addEncodedStreams(encodedMuxedStreamList, encodedStreams, urlEncoding);
+		}
+
+		//Adaptive stream data.
+		if (queryData.containsKey(ADAPTIVE_STREAM_LIST_PARAMETER)) {
+			String encodedAdaptiveStreamList = decode(queryData.get(ADAPTIVE_STREAM_LIST_PARAMETER));
+			EncodedStreamUtils.addEncodedStreams(encodedAdaptiveStreamList, encodedStreams, urlEncoding);
+		}
+
 		encodedStreams.removeIf(target -> !target.decode(null, true));
 		encodedStreams.forEach(target -> video.getStreamOptions().add(target.getDecodedStream()));
 		return video;
@@ -111,9 +136,25 @@ public class EmbeddedDecoder implements Decoder {
 	private String decode(String string) {
 		try {
 			return URLDecoder.decode(string, urlEncoding);
-		} catch (UnsupportedEncodingException e) {
+		} catch (UnsupportedEncodingException | NullPointerException e) {
+			System.err.println("Error while decoding string " + string);
 			e.printStackTrace();
 			return string;
 		}
+	}
+
+	private void addJSONStreams(JSONArray array, Collection<EncodedStream> streams) {
+		array.forEach(target -> {
+			try {
+				if (!(target instanceof JSONObject)) return;
+				JSONObject obj = (JSONObject) target;
+				int iTag = obj.getInt("itag");
+				String url = URLDecoder.decode(obj.getString("url"), urlEncoding);
+				streams.add(new EncodedStream(iTag, url));
+			} catch (UnsupportedEncodingException e) {
+				System.err.println("Error while parsing url.");
+				e.printStackTrace();
+			}
+		});
 	}
 }
