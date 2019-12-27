@@ -72,8 +72,6 @@ public class EmbeddedDecoder implements Decoder {
 		Map<String, String> queryData = getQueryMap(query);
 		checkExceptions(queryData);
 
-		queryData.forEach((key, value) -> System.out.println(key + "=" + value));
-
 		String title = queryData.containsKey(TITLE_PARAMETER) ? decode(queryData.get(TITLE_PARAMETER)) : "null";
 		String author = queryData.containsKey(AUTHOR_PARAMETER) ? decode(queryData.get(AUTHOR_PARAMETER)) : "null";
 		YoutubeVideo video = new YoutubeVideo(title, author);
