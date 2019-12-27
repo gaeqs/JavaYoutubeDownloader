@@ -13,7 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This decrypt algorithm used the video player code from the youtube's web to decrypt the signature code.
+ * This decrypt algorithm uses the video player code from the youtube's web to decrypt the signature code.
  */
 public class HTML5SignatureDecrypt implements Decrypt {
 
@@ -47,22 +47,22 @@ public class HTML5SignatureDecrypt implements Decrypt {
 
 		String[] patterns = {"([\\w$]+)\\s*=\\s*function\\(([\\w$]+)\\).\\s*\\2=\\s*\\2\\.split\\(\"\"\\)\\s*;"};
 
+		String name = null;
+
 		for (String pattern : patterns) {
 			Pattern decodeFunctionName = Pattern.compile(pattern);
 			Matcher decodeFunctionNameMatch = decodeFunctionName.matcher(playerJS);
 			if (decodeFunctionNameMatch.find()) {
-				return decodeFunctionNameMatch.group(1);
+				name = decodeFunctionNameMatch.group(1);
 			}
 		}
-		return null;
+		return name;
 	}
 
 	public String extractDecodeFunctions(String playerJS, String functionName) {
 		StringBuilder decodeScript = new StringBuilder();
-		Pattern decodeFunction = Pattern
-				// this will probably change from version to version so
-				// changes have to be done here
-				.compile(String.format("(%s=function\\([a-zA-Z0-9$]+\\)\\{.*?\\})[,;]", Pattern.quote(functionName)),
+		//May change.
+		Pattern decodeFunction = Pattern.compile(String.format("(%s=function\\([a-zA-Z0-9$]+\\)\\{.*?\\})[,;]", Pattern.quote(functionName)),
 						Pattern.DOTALL);
 		Matcher decodeFunctionMatch = decodeFunction.matcher(playerJS);
 		if (decodeFunctionMatch.find()) {
@@ -103,6 +103,9 @@ public class HTML5SignatureDecrypt implements Decrypt {
 		final String playerScript = getHtml5PlayerScript();
 		final String decodeFuncName = getMainDecodeFunctionName(playerScript);
 		final String decodeScript = extractDecodeFunctions(playerScript, decodeFuncName);
+
+		System.out.println("Decode script found: " + decodeFuncName);
+		System.out.println(decodeScript);
 
 		String decodedSignature = null;
 		try {

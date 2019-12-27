@@ -13,7 +13,7 @@ class JavaYoutubeDownloaderTest {
 
 	@Test
 	public void htmlTest() throws MalformedURLException {
-		YoutubeVideo video = JavaYoutubeDownloader.decode("https://www.youtube.com/watch?v=JmzMzAbR6D0",
+		YoutubeVideo video = JavaYoutubeDownloader.decode("https://www.youtube.com/watch?v=PNK8TmaRSQY",
 				MultipleDecoderMethod.AND, "html");
 		assertNotNull(video, "Video is null.");
 		assertFalse(video.getStreamOptions().isEmpty(), "Video options list is empty.");
@@ -23,7 +23,7 @@ class JavaYoutubeDownloaderTest {
 
 	@Test
 	public void embeddedTest() throws MalformedURLException {
-		YoutubeVideo video = JavaYoutubeDownloader.decode("https://www.youtube.com/watch?v=JmzMzAbR6D0",
+		YoutubeVideo video = JavaYoutubeDownloader.decode("https://www.youtube.com/watch?v=PNK8TmaRSQY",
 				MultipleDecoderMethod.AND, "embedded");
 		assertNotNull(video, "Video is null.");
 		assertFalse(video.getStreamOptions().isEmpty(), "Video options list is empty.");

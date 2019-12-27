@@ -19,7 +19,7 @@ public class SignatureDecrypt implements Decrypt {
 
 
 	//Reverses the array.
-	public void h1() {
+	public void m2() {
 		char t;
 		for (int i = 0; i < sig.length / 2; i++) {
 			t = sig[i];
@@ -28,13 +28,14 @@ public class SignatureDecrypt implements Decrypt {
 		}
 	}
 
-	public void s3(int i) {
+	//Splice
+	public void uB(int i) {
 		char[] array = new char[sig.length - i];
 		System.arraycopy(sig, i, array, 0, sig.length - i);
 		sig = array;
 	}
 
-	private void sd(int i) {
+	private void vf(int i) {
 		char c = sig[0];
 		sig[0] = sig[i % sig.length];
 		sig[i % sig.length] = c;
@@ -42,14 +43,14 @@ public class SignatureDecrypt implements Decrypt {
 
 	@Override
 	public String decrypt() {
-		h1();
-		s3(3);
-		h1();
-		sd(65);
-		h1();
-		s3(1);
-		h1();
-		sd(20);
+		vf(26);
+		uB(1);
+		m2();
+		uB(2);
+		m2();
+		uB(1);
+		vf(45);
+		m2();
 		return new String(sig);
 	}
 }

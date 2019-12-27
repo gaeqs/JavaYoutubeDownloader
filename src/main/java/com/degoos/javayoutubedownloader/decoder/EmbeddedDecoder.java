@@ -6,14 +6,16 @@ import com.degoos.javayoutubedownloader.stream.YoutubeVideo;
 import com.degoos.javayoutubedownloader.util.EncodedStreamUtils;
 import com.degoos.javayoutubedownloader.util.HTMLUtils;
 import com.degoos.javayoutubedownloader.util.IdExtractor;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.degoos.javayoutubedownloader.util.PlayerResponseUtils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class represents a decoder that uses the Youtube's embedded API to decode stream options.
@@ -34,8 +36,6 @@ public class EmbeddedDecoder implements Decoder {
 	public static final String ADAPTIVE_STREAM_LIST_PARAMETER = "adaptive_fmts";
 
 	public static final String PLAYER_RESPONSE_LIST_PARAMETER = "player_response";
-	public static final String STREAMING_DATA_JSON_PARAMETER = "streamingData";
-	public static final String FORMATS_JSON_PARAMETER = "formats";
 
 	private String urlEncoding;
 	private String getVideoUrl;
@@ -78,15 +78,9 @@ public class EmbeddedDecoder implements Decoder {
 
 		List<EncodedStream> encodedStreams = new LinkedList<>();
 
-		//Player response data.
 		if (queryData.containsKey(PLAYER_RESPONSE_LIST_PARAMETER)) {
-			JSONObject obj = new JSONObject(decode(queryData.get(PLAYER_RESPONSE_LIST_PARAMETER)));
-			if (obj.has(STREAMING_DATA_JSON_PARAMETER)) {
-				obj = obj.getJSONObject(STREAMING_DATA_JSON_PARAMETER);
-				if (obj.has(FORMATS_JSON_PARAMETER)) {
-					addJSONStreams(obj.getJSONArray(FORMATS_JSON_PARAMETER), encodedStreams);
-				}
-			}
+			PlayerResponseUtils.addPlayerResponseStreams(decode(queryData.get(PLAYER_RESPONSE_LIST_PARAMETER)),
+					encodedStreams, urlEncoding);
 		}
 
 		//Muxed stream data.
@@ -139,20 +133,5 @@ public class EmbeddedDecoder implements Decoder {
 			e.printStackTrace();
 			return string;
 		}
-	}
-
-	private void addJSONStreams(JSONArray array, Collection<EncodedStream> streams) {
-		array.forEach(target -> {
-			try {
-				if (!(target instanceof JSONObject)) return;
-				JSONObject obj = (JSONObject) target;
-				int iTag = obj.getInt("itag");
-				String url = URLDecoder.decode(obj.getString("url"), urlEncoding);
-				streams.add(new EncodedStream(iTag, url));
-			} catch (UnsupportedEncodingException e) {
-				System.err.println("Error while parsing url.");
-				e.printStackTrace();
-			}
-		});
 	}
 }

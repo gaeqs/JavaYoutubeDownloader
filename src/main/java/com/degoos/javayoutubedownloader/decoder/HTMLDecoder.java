@@ -5,6 +5,7 @@ import com.degoos.javayoutubedownloader.stream.EncodedStream;
 import com.degoos.javayoutubedownloader.stream.YoutubeVideo;
 import com.degoos.javayoutubedownloader.util.EncodedStreamUtils;
 import com.degoos.javayoutubedownloader.util.HTMLUtils;
+import com.degoos.javayoutubedownloader.util.PlayerResponseUtils;
 
 import java.io.IOException;
 import java.net.URI;
@@ -62,12 +63,25 @@ public class HTMLDecoder implements Decoder {
 		YoutubeVideo video = new YoutubeVideo(title, null);
 		List<EncodedStream> encodedStreams = new LinkedList<>();
 
+
+		if (html.contains("\"player_response\"")) {
+			String player_response = html.substring(html.indexOf("\"player_response\""));
+			player_response = player_response.substring(0, player_response.indexOf("}\",")) + "}";
+			player_response = player_response.replaceFirst("\"player_response\":\"", "");
+			player_response = player_response.replace("\\/", "/")
+					.replace("\\\"", "\"")
+					.replace("\\\\", "\\");
+			PlayerResponseUtils.addPlayerResponseStreams(player_response, encodedStreams, urlEncoding);
+		}
+
 		if (encodedMuxedStreamList != null)
 			EncodedStreamUtils.addEncodedStreams(encodedMuxedStreamList, encodedStreams, urlEncoding);
 		if (encodedAdaptiveStreamList != null)
 			EncodedStreamUtils.addEncodedStreams(encodedAdaptiveStreamList, encodedStreams, urlEncoding);
 
+		System.out.println("Before filter: " + encodedStreams.size());
 		encodedStreams.removeIf(target -> !target.decode(player, true));
+		System.out.println("After filter: " + encodedStreams.size());
 		encodedStreams.forEach(target -> video.getStreamOptions().add(target.getDecodedStream()));
 		return video;
 	}
