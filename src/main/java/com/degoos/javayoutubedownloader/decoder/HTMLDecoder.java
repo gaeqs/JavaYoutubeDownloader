@@ -79,9 +79,7 @@ public class HTMLDecoder implements Decoder {
 		if (encodedAdaptiveStreamList != null)
 			EncodedStreamUtils.addEncodedStreams(encodedAdaptiveStreamList, encodedStreams, urlEncoding);
 
-		System.out.println("Before filter: " + encodedStreams.size());
 		encodedStreams.removeIf(target -> !target.decode(player, true));
-		System.out.println("After filter: " + encodedStreams.size());
 		encodedStreams.forEach(target -> video.getStreamOptions().add(target.getDecodedStream()));
 		return video;
 	}

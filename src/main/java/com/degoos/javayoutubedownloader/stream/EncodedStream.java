@@ -120,15 +120,12 @@ public class EncodedStream {
 		if (!hasSignature()) {
 			created = decodeSimple();
 		} else {
-			System.out.println("Decoding complex stream...");
 			created = decodeComplex(playerUri);
 		}
 		if (!created) return false;
 		if (!checkConnection) return true;
-		System.out.println("Decoded stream created. Checking connection...");
-		System.out.println("Stream: " + decodedStream.getUrl());
 		if (!decodedStream.checkConnection()) {
-			System.out.println("Error checking connection!");
+			System.out.println("Error checking connection! (Signature nto working)");
 			decodedStream = null;
 			return false;
 		}
@@ -154,10 +151,8 @@ public class EncodedStream {
 	private boolean decodeComplex(URI playerUri) {
 		Decrypt decrypt;
 		if (playerUri == null) {
-			System.out.println("Decoding via signature.");
 			decrypt = new SignatureDecrypt(signature);
 		} else {
-			System.out.println("Decoding via HTML5 signature.");
 			decrypt = new HTML5SignatureDecrypt(signature, playerUri);
 		}
 		String decryptedSignature = decrypt.decrypt();
