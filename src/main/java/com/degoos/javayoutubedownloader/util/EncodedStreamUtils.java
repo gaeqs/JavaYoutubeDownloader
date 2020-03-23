@@ -56,7 +56,6 @@ public class EncodedStreamUtils {
 			throws UnsupportedEncodingException {
 
 		int iTag = json.getInteger("itag");
-		System.out.println("ADD "+iTag);
 
 		if (json.containsKey("cipher")) {
 			String cipher = json.getString("cipher").replace("\\u0026", "&");
