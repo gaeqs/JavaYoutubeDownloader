@@ -1,5 +1,6 @@
 package com.degoos.javayoutubedownloader.util;
 
+import com.alibaba.fastjson.JSONObject;
 import com.degoos.javayoutubedownloader.stream.EncodedStream;
 
 import java.io.UnsupportedEncodingException;
@@ -48,6 +49,52 @@ public class EncodedStreamUtils {
 			}
 			if (iTag == -1 || url == null) continue;
 			collection.add(new EncodedStream(iTag, url, encoding));
+		}
+	}
+
+	public static void addEncodedStreams(JSONObject json, Collection<EncodedStream> collection, String urlEnconding)
+			throws UnsupportedEncodingException {
+
+		int iTag = json.getInteger("itag");
+		System.out.println("ADD "+iTag);
+
+		if (json.containsKey("cipher")) {
+			String cipher = json.getString("cipher").replace("\\u0026", "&");
+			String[] pairs = cipher.split("&");
+
+			String encodedUrl = null;
+			String signature = null;
+
+			int equalsIndex;
+			String key, value;
+			for (String pair : pairs) {
+				equalsIndex = pair.indexOf('=');
+				key = pair.substring(0, equalsIndex);
+				value = pair.substring(equalsIndex + 1);
+
+				if (key.equals("url")) {
+					encodedUrl = value;
+				} else if (key.equals("s")) {
+					signature = value;
+				}
+			}
+
+			if (encodedUrl == null) {
+				System.err.println("Encoded URL is null.");
+				return;
+			}
+			encodedUrl = URLDecoder.decode(encodedUrl, urlEnconding);
+			if (!encodedUrl.contains("signature") && !encodedUrl.contains("&sig=") && !encodedUrl.contains("&lsign=")) {
+				if (signature != null) {
+					signature = URLDecoder.decode(signature, urlEnconding);
+				}
+				collection.add(new EncodedStream(iTag, encodedUrl, signature));
+			} else {
+				collection.add(new EncodedStream(iTag, encodedUrl));
+			}
+		} else {
+			if (!json.containsKey("url")) return;
+			collection.add(new EncodedStream(iTag, json.getString("url")));
 		}
 	}
 

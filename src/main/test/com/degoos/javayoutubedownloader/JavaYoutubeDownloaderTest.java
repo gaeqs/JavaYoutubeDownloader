@@ -11,60 +11,68 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class JavaYoutubeDownloaderTest {
 
+	private static final int SLEEP = 0;
+
 	@Test
-	public void htmlTest() throws MalformedURLException {
+	public void htmlTest() throws MalformedURLException, InterruptedException {
+		Thread.sleep(SLEEP);
 		YoutubeVideo video = JavaYoutubeDownloader.decode("https://www.youtube.com/watch?v=PNK8TmaRSQY",
 				MultipleDecoderMethod.AND, "html");
 		assertNotNull(video, "Video is null.");
 		assertFalse(video.getStreamOptions().isEmpty(), "Video options list is empty.");
 		System.out.println("URLs:");
-		video.getStreamOptions().forEach(target -> System.out.println(target.getUrl()));
+		video.getStreamOptions().forEach(target -> System.out.println(target.getType() + "\n" + target.getUrl()));
 	}
 
 	@Test
-	public void embeddedTest() throws MalformedURLException {
+	public void embeddedTest() throws MalformedURLException, InterruptedException {
+		Thread.sleep(SLEEP);
 		YoutubeVideo video = JavaYoutubeDownloader.decode("https://www.youtube.com/watch?v=PNK8TmaRSQY",
 				MultipleDecoderMethod.AND, "embedded");
 		assertNotNull(video, "Video is null.");
 		assertFalse(video.getStreamOptions().isEmpty(), "Video options list is empty.");
-		video.getStreamOptions().forEach(target -> System.out.println(target.getUrl()));
+		video.getStreamOptions().forEach(target -> System.out.println(target.getType() + "\n" + target.getUrl()));
 	}
 
 	@Test
-	public void htmlTestOldVideo() throws MalformedURLException {
+	public void htmlTestOldVideo() throws MalformedURLException, InterruptedException {
+		Thread.sleep(SLEEP);
 		YoutubeVideo video = JavaYoutubeDownloader.decode("https://www.youtube.com/watch?v=l_jUBScR1RA",
 				MultipleDecoderMethod.AND, "html");
 		assertNotNull(video, "Video is null.");
 		assertFalse(video.getStreamOptions().isEmpty(), "Video options list is empty.");
 		System.out.println("URLs:");
-		video.getStreamOptions().forEach(target -> System.out.println(target.getUrl()));
+		video.getStreamOptions().forEach(target -> System.out.println(target.getType() + "\n" + target.getUrl()));
 	}
 
 	@Test
-	public void embeddedTestOldVideo() throws MalformedURLException {
+	public void embeddedTestOldVideo() throws MalformedURLException, InterruptedException {
+		Thread.sleep(SLEEP);
 		YoutubeVideo video = JavaYoutubeDownloader.decode("https://www.youtube.com/watch?v=l_jUBScR1RA",
 				MultipleDecoderMethod.AND, "embedded");
 		assertNotNull(video, "Video is null.");
 		assertFalse(video.getStreamOptions().isEmpty(), "Video options list is empty.");
-		video.getStreamOptions().forEach(target -> System.out.println(target.getUrl()));
+		video.getStreamOptions().forEach(target -> System.out.println(target.getType() + "\n" + target.getUrl()));
 	}
 
 	@Test
-	public void htmlTestProtected() throws MalformedURLException {
-		YoutubeVideo video = JavaYoutubeDownloader.decode("https://www.youtube.com/watch?v=Nx-DvH41Tjo",
+	public void htmlTestProtected() throws MalformedURLException, InterruptedException {
+		Thread.sleep(SLEEP);
+		YoutubeVideo video = JavaYoutubeDownloader.decode("https://www.youtube.com/watch?v=kJQP7kiw5Fk",
 				MultipleDecoderMethod.AND, "html");
 		assertNotNull(video, "Video is null.");
 		assertFalse(video.getStreamOptions().isEmpty(), "Video options list is empty.");
-		video.getStreamOptions().forEach(target -> System.out.println(target.getUrl()));
+		video.getStreamOptions().forEach(target -> System.out.println(target.getType() + "\n" + target.getUrl()));
 	}
 
 	@Test
-	public void embeddedTestProtected() throws MalformedURLException {
+	public void embeddedTestProtected() throws MalformedURLException, InterruptedException {
+		Thread.sleep(SLEEP);
 		YoutubeVideo video = JavaYoutubeDownloader.decode("https://www.youtube.com/watch?v=Nx-DvH41Tjo",
 				MultipleDecoderMethod.AND, "embedded");
 		assertNotNull(video, "Video is null.");
 		assertFalse(video.getStreamOptions().isEmpty(), "Video options list is empty.");
-		video.getStreamOptions().forEach(target -> System.out.println(target.getUrl()));
+		video.getStreamOptions().forEach(target -> System.out.println(target.getType() + "\n" + target.getUrl()));
 	}
 
 }

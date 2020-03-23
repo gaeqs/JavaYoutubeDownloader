@@ -1,17 +1,18 @@
 package com.degoos.javayoutubedownloader.decoder;
 
-import com.degoos.javayoutubedownloader.exception.HTMLExtractionException;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.degoos.javayoutubedownloader.stream.EncodedStream;
 import com.degoos.javayoutubedownloader.stream.YoutubeVideo;
 import com.degoos.javayoutubedownloader.util.EncodedStreamUtils;
 import com.degoos.javayoutubedownloader.util.HTMLUtils;
-import com.degoos.javayoutubedownloader.util.PlayerResponseUtils;
 
 import java.io.IOException;
-import java.net.URI;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,14 +27,10 @@ import java.util.regex.Pattern;
  */
 public class HTMLDecoder implements Decoder {
 
-	private static final Pattern AGE_PATTERN = Pattern.compile("(verify_age)");
-	private static final Pattern UNAVAILABLE_PLAYER_PATTERN = Pattern.compile("(unavailable-player)");
-	private static final Pattern PLAYER_PATTERN = Pattern.compile("jsbin\\\\/(player(_ias)?-(.+?).js)");
-	private static final Pattern TITLE_PATTERN = Pattern.compile("<meta name=\"title\" content=(.*)");
+	private static final Pattern YT_PLAYER_CONFIG = Pattern.compile(";ytplayer\\.config = (\\{.*?});");
+
 	private static final Pattern MUXED_STREAM_LIST_PATTERN = Pattern.compile("\"url_encoded_fmt_stream_map\":\"([^\"]*)\"");
 	private static final Pattern ADAPTIVE_STREAM_LIST_PATTERN = Pattern.compile("\"adaptive_fmts\":\\s*\"([^\"]*)\"");
-
-	private static final String JS_FILE = "https://s.ytimg.com/yts/jsbin/";
 
 	private String urlEncoding;
 
@@ -52,79 +49,47 @@ public class HTMLDecoder implements Decoder {
 	@Override
 	public YoutubeVideo extractVideo(URL url) throws IOException {
 		String html = HTMLUtils.readAll(url);
-		checkAge(html);
-		checkPlayer(html);
 
-		String title = getTitle(html, url);
-		URI player = getHTML5PlayerUri(html);
+		Matcher matcher = YT_PLAYER_CONFIG.matcher(html);
+		if (!matcher.find()) {
+			throw new NullPointerException("Player config not found!");
+		}
+		String rawConfig = matcher.group(1);
+		JSONObject config = JSON.parseObject(rawConfig);
+		JSONObject args = config.getJSONObject("args");
+		JSONObject response = args.getJSONObject("player_response");
 
-		String encodedMuxedStreamList = sanityStreamList(fastMatcher(html, MUXED_STREAM_LIST_PATTERN, 1));
-		String encodedAdaptiveStreamList = sanityStreamList(fastMatcher(html, ADAPTIVE_STREAM_LIST_PATTERN, 1));
-		YoutubeVideo video = new YoutubeVideo(title, null);
-		List<EncodedStream> encodedStreams = new LinkedList<>();
+		JSONObject details = response.getJSONObject("videoDetails");
+		JSONObject streamingData = response.getJSONObject("streamingData");
+
+		String jsUrl = "https://youtube.com" + config.getJSONObject("assets").getString("js");
 
 
-		if (html.contains("\"player_response\"")) {
-			String player_response = html.substring(html.indexOf("\"player_response\""));
-			player_response = player_response.substring(0, player_response.indexOf("}\",")) + "}";
-			player_response = player_response.replaceFirst("\"player_response\":\"", "");
-			player_response = player_response.replace("\\/", "/")
-					.replace("\\\"", "\"")
-					.replace("\\\\", "\\");
-			PlayerResponseUtils.addPlayerResponseStreams(player_response, encodedStreams, urlEncoding);
+		Set<EncodedStream> encodedStreams = new HashSet<>();
+
+		if (streamingData.containsKey("formats")) {
+			streamingData.getJSONArray("formats").forEach(o -> parseFormat(o, encodedStreams));
+		}
+		if (streamingData.containsKey("adaptiveFormats")) {
+			streamingData.getJSONArray("adaptiveFormats").forEach(o -> parseFormat(o, encodedStreams));
 		}
 
-		if (encodedMuxedStreamList != null)
-			EncodedStreamUtils.addEncodedStreams(encodedMuxedStreamList, encodedStreams, urlEncoding);
-		if (encodedAdaptiveStreamList != null)
-			EncodedStreamUtils.addEncodedStreams(encodedAdaptiveStreamList, encodedStreams, urlEncoding);
+		YoutubeVideo video = new YoutubeVideo(details.getString("title"), details.getString("author"), null);
 
-		encodedStreams.removeIf(target -> !target.decode(player, true));
+		encodedStreams.removeIf(target -> !target.decode(jsUrl, false));
 		encodedStreams.forEach(target -> video.getStreamOptions().add(target.getDecodedStream()));
+
 		return video;
 	}
 
-	public void checkAge(String html) {
-		if (AGE_PATTERN.matcher(html).find())
-			throw new HTMLExtractionException("Age restriction");
-	}
-
-	public void checkPlayer(String html) {
-		if (UNAVAILABLE_PLAYER_PATTERN.matcher(html).find())
-			throw new HTMLExtractionException("Unavailable player");
-	}
-
-	public URI getHTML5PlayerUri(String html) {
-		Matcher playerVersionMatch = PLAYER_PATTERN.matcher(html);
-		if (playerVersionMatch.find()) {
+	private void parseFormat(Object object, Collection<EncodedStream> collection) {
+		if (object instanceof JSONObject) {
 			try {
-				String data = playerVersionMatch.group(1).replace("\\/", "/");
-				return new URI(JS_FILE + data);
-			} catch (Exception ex) {
-				throw new HTMLExtractionException(ex);
+				EncodedStreamUtils.addEncodedStreams((JSONObject) object, collection, urlEncoding);
+			} catch (UnsupportedEncodingException e) {
+				System.err.println("Error while parsing URL.");
+				e.printStackTrace();
 			}
 		}
-		return null;
-	}
-
-	private String getTitle(String html, URL url) {
-		Matcher titleMatch = TITLE_PATTERN.matcher(html);
-		if (titleMatch.find()) {
-			String sline = titleMatch.group(1);
-			String name = sline.replaceFirst("<meta name=\"title\" content=", "").trim();
-			return name.substring(1, name.length() - 2);
-		}
-		return url.toString();
-	}
-
-	private String fastMatcher(String string, Pattern pattern, int group) {
-		Matcher matcher = pattern.matcher(string);
-		if (matcher.find())
-			return matcher.group(group);
-		return null;
-	}
-
-	private String sanityStreamList(String list) {
-		return list == null ? null : list.replace("\\u0026", "&");
 	}
 }

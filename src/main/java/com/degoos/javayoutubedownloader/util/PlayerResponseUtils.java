@@ -1,8 +1,8 @@
 package com.degoos.javayoutubedownloader.util;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.degoos.javayoutubedownloader.stream.EncodedStream;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -16,10 +16,10 @@ public class PlayerResponseUtils {
 
 	public static void addPlayerResponseStreams(String json, Collection<EncodedStream> streams, String urlEncoding) {
 		//Player response data.
-		JSONObject obj = new JSONObject(json);
-		if (obj.has(STREAMING_DATA_JSON_PARAMETER)) {
+		JSONObject obj = JSONObject.parseObject(json);
+		if (obj.containsKey(STREAMING_DATA_JSON_PARAMETER)) {
 			obj = obj.getJSONObject(STREAMING_DATA_JSON_PARAMETER);
-			if (obj.has(FORMATS_JSON_PARAMETER)) {
+			if (obj.containsKey(FORMATS_JSON_PARAMETER)) {
 				addJSONStreams(obj.getJSONArray(FORMATS_JSON_PARAMETER), streams, urlEncoding);
 			}
 
@@ -32,14 +32,14 @@ public class PlayerResponseUtils {
 			if (!(target instanceof JSONObject)) return;
 			JSONObject obj = (JSONObject) target;
 			try {
-				if (obj.has("cipher")) {
+				if (obj.containsKey("cipher")) {
 					List<EncodedStream> list = new ArrayList<>();
 					EncodedStreamUtils.addEncodedStreams(URLDecoder.decode(obj.getString("cipher"), urlEncoding), list, urlEncoding);
 					list.forEach(stream -> System.out.println(stream.getUrl() + "\n - " + stream.getSignature().orElse(null)));
 					streams.addAll(list);
 				}
-				if (obj.has("url")) {
-					int iTag = obj.getInt("itag");
+				if (obj.containsKey("url")) {
+					int iTag = obj.getInteger("itag");
 					String url = URLDecoder.decode(obj.getString("url"), urlEncoding);
 					streams.add(new EncodedStream(iTag, url));
 				}

@@ -3,22 +3,23 @@ package com.degoos.javayoutubedownloader.stream;
 import com.degoos.javayoutubedownloader.JavaYoutubeDownloader;
 import com.degoos.javayoutubedownloader.decrypt.Decrypt;
 import com.degoos.javayoutubedownloader.decrypt.HTML5SignatureDecrypt;
-import com.degoos.javayoutubedownloader.decrypt.SignatureDecrypt;
 import com.degoos.javayoutubedownloader.exception.StreamEncodedException;
 import com.degoos.javayoutubedownloader.util.Validate;
 
-import java.net.URI;
 import java.net.URL;
 import java.util.Optional;
 
 /**
  * Represents a {@link StreamOption} that is not decoded. You can created the decoded {@link StreamOption}
- * using the method {@link #decode(URI, boolean)}.
+ * using the method {@link #decode(String, boolean)}.
  * The iTag and the url cannot be null.
  */
 public class EncodedStream {
 
+	private static final String DEFAULT_JS_SCRIPT = "https://youtube.com/yts/jsbin/player_ias-vflEO2H8R/en_US/base.js";
 	private static final String SIGNATURE_PARAMETER = "&sig=";
+
+	private static final Decrypt DECRYPT = new HTML5SignatureDecrypt();
 
 	private int iTag;
 	private String url;
@@ -74,7 +75,7 @@ public class EncodedStream {
 
 	/**
 	 * Returns the encrypted signature code, if present. The signature code is decrypted when the method
-	 * {@link #decode(URI, boolean)} is executed.
+	 * {@link #decode(String, boolean)} is executed.
 	 *
 	 * @return the encrypted signature code.
 	 */
@@ -92,11 +93,11 @@ public class EncodedStream {
 	}
 
 	/**
-	 * Returns the decoded stream if the method {@link #decode(URI, boolean)} was previously executed, or
+	 * Returns the decoded stream if the method {@link #decode(String, boolean)} was previously executed, or
 	 * throws a {@link StreamEncodedException} if no decoded stream is found.
 	 *
 	 * @return the decoded stream.
-	 * @throws StreamEncodedException if no decoded stream is found. Use the method {@link #decode(URI, boolean)}
+	 * @throws StreamEncodedException if no decoded stream is found. Use the method {@link #decode(String, boolean)}
 	 *                                to generate one.
 	 */
 	public StreamOption getDecodedStream() {
@@ -108,24 +109,24 @@ public class EncodedStream {
 	 * Generates a {@link StreamOption} decoding the data of this EncodedStream. A decode may fail, so
 	 * the method returns whether the process was successful.
 	 *
-	 * @param playerUri       the youtube's player URI, or null if you don't have one. This is used to decrypt the
+	 * @param jsUrl           the youtube JS file url, or null if you don't have one. This is used to decrypt the
 	 *                        signature using the online algorithm.
 	 * @param checkConnection whether the method will check if the decoded URL is accessible. If it's not the created
 	 *                        decoded stream will be deleted, and this method will return false.
 	 * @return whether the decode was successful.
 	 */
-	public boolean decode(URI playerUri, boolean checkConnection) {
+	public boolean decode(String jsUrl, boolean checkConnection) {
 		if (decodedStream != null) return true;
 		boolean created;
 		if (!hasSignature()) {
 			created = decodeSimple();
 		} else {
-			created = decodeComplex(playerUri);
+			created = decodeComplex(jsUrl);
 		}
 		if (!created) return false;
 		if (!checkConnection) return true;
 		if (!decodedStream.checkConnection()) {
-			System.out.println("Error checking connection! (Signature nto working)");
+			System.out.println("Error checking connection! (Signature not working)\n" + decodedStream.getUrl());
 			decodedStream = null;
 			return false;
 		}
@@ -148,14 +149,8 @@ public class EncodedStream {
 		}
 	}
 
-	private boolean decodeComplex(URI playerUri) {
-		Decrypt decrypt;
-		if (playerUri == null) {
-			decrypt = new SignatureDecrypt(signature);
-		} else {
-			decrypt = new HTML5SignatureDecrypt(signature, playerUri);
-		}
-		String decryptedSignature = decrypt.decrypt();
+	private boolean decodeComplex(String jsUrl) {
+		String decryptedSignature = DECRYPT.decrypt(jsUrl == null ? DEFAULT_JS_SCRIPT : jsUrl, signature);
 		try {
 			decodedStream = new StreamOption(new URL(url + SIGNATURE_PARAMETER + decryptedSignature),
 					JavaYoutubeDownloader.getITagMap().get(iTag));

@@ -10,6 +10,6 @@ public interface Decrypt {
 	 *
 	 * @return the decrypted code.
 	 */
-	String decrypt();
+	String decrypt(String jsUrl, String signature);
 
 }

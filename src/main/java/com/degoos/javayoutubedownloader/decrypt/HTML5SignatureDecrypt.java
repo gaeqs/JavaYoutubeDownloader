@@ -6,7 +6,8 @@ import com.degoos.javayoutubedownloader.util.HTMLUtils;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import java.net.URI;
+import javax.script.ScriptException;
+import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
@@ -17,53 +18,65 @@ import java.util.regex.Pattern;
  */
 public class HTML5SignatureDecrypt implements Decrypt {
 
-	public String sig;
-	public URI playerURI;
-	public static ConcurrentMap<String, String> playerCache = new ConcurrentHashMap<>();
+	private static Pattern[] MAIN_FUNCTION_PATTERNS = new Pattern[]{
+			Pattern.compile("\\b[cs]\\s*&&\\s*[adf]\\.set\\([^,]+\\s*,\\s*encodeURIComponent\\s*\\(\\s*([a-zA-Z0-9$]+)\\("),
+			Pattern.compile("\\b[a-zA-Z0-9]+\\s*&&\\s*[a-zA-Z0-9]+\\.set\\([^,]+\\s*,\\s*encodeURIComponent\\s*\\(\\s*([a-zA-Z0-9$]+)\\("),
+			Pattern.compile("\\b([a-zA-Z0-9$]{2})\\s*=\\s*function\\(\\s*a\\s*\\)\\s*\\{\\s*a\\s*=\\s*a\\.split\\(\\s*\"\"\\s*\\)"),
+			Pattern.compile("([a-zA-Z0-9$]+)\\s*=\\s*function\\(\\s*a\\s*\\)\\s*\\{\\s*a\\s*=\\s*a\\.split\\(\\s*\"\"\\s*\\)"),
+			Pattern.compile("([\"'])signature\\1\\s*,\\s*([a-zA-Z0-9$]+)\\("),
+			Pattern.compile("\\.sig\\|\\|([a-zA-Z0-9$]+)\\("),
+			Pattern.compile("yt\\.akamaized\\.net/\\)\\s*\\|\\|\\s*.*?\\s*[cs]\\s*&&\\s*[adf]\\.set\\([^,]+\\s*,\\s*(?:encodeURIComponent\\s*\\()?\\s*()$"),
+			Pattern.compile("\\b[cs]\\s*&&\\s*[adf]\\.set\\([^,]+\\s*,\\s*([a-zA-Z0-9$]+)\\("),
+			Pattern.compile("\\b[a-zA-Z0-9]+\\s*&&\\s*[a-zA-Z0-9]+\\.set\\([^,]+\\s*,\\s*([a-zA-Z0-9$]+)\\("),
+			Pattern.compile("\\bc\\s*&&\\s*a\\.set\\([^,]+\\s*,\\s*\\([^)]*\\)\\s*\\(\\s*([a-zA-Z0-9$]+)\\("),
+			Pattern.compile("\\bc\\s*&&\\s*[a-zA-Z0-9]+\\.set\\([^,]+\\s*,\\s*\\([^)]*\\)\\s*\\(\\s*([a-zA-Z0-9$]+)\\(")
+	};
 
-	public HTML5SignatureDecrypt(String signature, URI playerURI) {
-		this.sig = signature;
-		this.playerURI = playerURI;
+
+	public static ConcurrentMap<String, DecryptScript> playerCache = new ConcurrentHashMap<>();
+
+	private DecryptScript getScript(String jsUrl) throws ScriptException {
+		DecryptScript script = playerCache.get(jsUrl);
+		if (script != null) return script;
+
+		ScriptEngineManager manager = new ScriptEngineManager();
+		// use a js script engine
+		ScriptEngine engine = manager.getEngineByName("JavaScript");
+
+		String playerScript = getHtml5PlayerScript(jsUrl);
+		String decodeFuncName = getMainDecodeFunctionName(playerScript);
+		String decodeScript = extractDecodeFunctions(playerScript, decodeFuncName);
+
+		engine.eval(decodeScript);
+		Invocable invocable = (Invocable) engine;
+		script = new DecryptScript(decodeFuncName, invocable);
+		playerCache.put(jsUrl, script);
+		return script;
 	}
 
-
-	private String getHtml5PlayerScript() {
-		String url = playerCache.get(playerURI.toString());
-
-		if (url == null) {
-			try {
-				String result = HTMLUtils.readAll(playerURI.toURL());
-				playerCache.put(playerURI.toString(), result);
-				return result;
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
+	private String getHtml5PlayerScript(String jsUrl) {
+		try {
+			return HTMLUtils.readAll(new URL(jsUrl));
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
-
-		return url;
 	}
 
 	private String getMainDecodeFunctionName(String playerJS) {
-
-		String[] patterns = {"([\\w$]+)\\s*=\\s*function\\(([\\w$]+)\\).\\s*\\2=\\s*\\2\\.split\\(\"\"\\)\\s*;"};
-
-		String name = null;
-
-		for (String pattern : patterns) {
-			Pattern decodeFunctionName = Pattern.compile(pattern);
-			Matcher decodeFunctionNameMatch = decodeFunctionName.matcher(playerJS);
-			if (decodeFunctionNameMatch.find()) {
-				name = decodeFunctionNameMatch.group(1);
+		for (Pattern pattern : MAIN_FUNCTION_PATTERNS) {
+			Matcher matcher = pattern.matcher(playerJS);
+			if (matcher.find()) {
+				return matcher.group(1);
 			}
 		}
-		return name;
+		return null;
 	}
 
 	public String extractDecodeFunctions(String playerJS, String functionName) {
 		StringBuilder decodeScript = new StringBuilder();
 		//May change.
 		Pattern decodeFunction = Pattern.compile(String.format("(%s=function\\([a-zA-Z0-9$]+\\)\\{.*?\\})[,;]", Pattern.quote(functionName)),
-						Pattern.DOTALL);
+				Pattern.DOTALL);
 		Matcher decodeFunctionMatch = decodeFunction.matcher(playerJS);
 		if (decodeFunctionMatch.find()) {
 			decodeScript.append(decodeFunctionMatch.group(1)).append(';');
@@ -95,27 +108,15 @@ public class HTML5SignatureDecrypt implements Decrypt {
 	}
 
 	@Override
-	public String decrypt() {
-		ScriptEngineManager manager = new ScriptEngineManager();
-		// use a js script engine
-		ScriptEngine engine = manager.getEngineByName("JavaScript");
+	public String decrypt(String jsUrl, String signature) {
 
-		final String playerScript = getHtml5PlayerScript();
-		final String decodeFuncName = getMainDecodeFunctionName(playerScript);
-		final String decodeScript = extractDecodeFunctions(playerScript, decodeFuncName);
 
-		System.out.println("Decode script found: " + decodeFuncName);
-		System.out.println(decodeScript);
-
-		String decodedSignature = null;
+		String decodedSignature;
 		try {
-			// evaluate script
-			engine.eval(decodeScript);
-			Invocable inv = (Invocable) engine;
-			// execute the javascript code directly
-			decodedSignature = (String) inv.invokeFunction(decodeFuncName, sig);
+			DecryptScript script = getScript(jsUrl);
+			decodedSignature = (String) script.getInvocable().invokeFunction(script.getFunctionName(), signature);
 		} catch (Exception e) {
-			throw new DownloadException("Unable to decrypt signature!");
+			throw new DownloadException("Unable to decrypt signature!", e);
 		}
 		return decodedSignature;
 	}
