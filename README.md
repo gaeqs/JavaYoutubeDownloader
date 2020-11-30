@@ -8,21 +8,14 @@ few lines.
 
 <h2><b>Installation</b></h2>
 
-You can easily install JYD using our maven repository:
+You can easily install JYD using maven:
 
 ```xml
-<repositories>
-    <repository>
-        <id>com.degoos.mvn.repo</id>
-        <url>https://degoos.com/mvn-repo/</url>
-    </repository>
- </repositories>
-
 <dependencies>
     <dependency>
-        <groupId>com.degoos</groupId>
+        <groupId>io.github.gaeqs</groupId>
         <artifactId>JavaYoutubeDownloader</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.2</version>
     </dependency>
 </dependencies>
 ```
