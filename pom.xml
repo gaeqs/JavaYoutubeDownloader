@@ -7,6 +7,31 @@
     <groupId>io.github.gaeqs</groupId>
     <artifactId>JavaYoutubeDownloader</artifactId>
     <version>1.2</version>
+    <packaging>jar</packaging>
+
+    <name>${project.groupId}:${project.artifactId}</name>
+    <description>A simple but powerful Youtube Download API for Java</description>
+    <url>https://github.com/gaeqs/JavaYoutubeDownloader</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://raw.githubusercontent.com/gaeqs/JavaYoutubeDownloader/master/LICENSE</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Gael Rial Costas</name>
+            <email>gael.rial.costas@gmail.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/gaeqs/JavaYoutubeDownloader.git</connection>
+        <developerConnection>scm:git:ssh://github.com/gaeqs/JavaYoutubeDownloader.git</developerConnection>
+        <url>https://github.com/gaeqs/JavaYoutubeDownloader/tree/master</url>
+    </scm>
 
     <build>
         <plugins>
@@ -20,6 +45,7 @@
             </plugin>
         </plugins>
     </build>
+
     <dependencies>
 
         <dependency>
