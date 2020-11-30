@@ -27,10 +27,20 @@ import java.util.regex.Pattern;
  */
 public class HTMLDecoder implements Decoder {
 
-	private static final Pattern YT_PLAYER_CONFIG = Pattern.compile(";ytplayer\\.config = (\\{.*?});");
+	private static final String YOUTUBE_URL = "https://youtube.com";
 
-	private static final Pattern MUXED_STREAM_LIST_PATTERN = Pattern.compile("\"url_encoded_fmt_stream_map\":\"([^\"]*)\"");
-	private static final Pattern ADAPTIVE_STREAM_LIST_PATTERN = Pattern.compile("\"adaptive_fmts\":\\s*\"([^\"]*)\"");
+	private static final Pattern YT_PLAYER_RESPONSE = Pattern.compile("<script>var ytInitialPlayerResponse = (\\{.*?});");
+	private static final Pattern YT_PLAYER_CONFIG = Pattern.compile("ytplayer.web_player_context_config = (\\{.*?});");
+
+	private static final String KEY_STREAMING_DATA = "streamingData";
+	private static final String KEY_VIDEO_DETAILS = "videoDetails";
+
+	private static final String KEY_JS_URL = "jsUrl";
+
+	private static final String KEY_FORMATS = "formats";
+	private static final String KEY_ADAPTIVE_FORMATS = "adaptiveFormats";
+	private static final String KEY_TITLE = "title";
+	private static final String KEY_AUTHOR = "author";
 
 	private String urlEncoding;
 
@@ -50,31 +60,28 @@ public class HTMLDecoder implements Decoder {
 	public YoutubeVideo extractVideo(URL url) throws IOException {
 		String html = HTMLUtils.readAll(url);
 
-		Matcher matcher = YT_PLAYER_CONFIG.matcher(html);
-		if (!matcher.find()) {
-			throw new NullPointerException("Player config not found!");
-		}
-		String rawConfig = matcher.group(1);
+		String rawResponse = matchAndGet(YT_PLAYER_RESPONSE, html);
+		String rawConfig = matchAndGet(YT_PLAYER_CONFIG, html);
+
 		JSONObject config = JSON.parseObject(rawConfig);
-		JSONObject args = config.getJSONObject("args");
-		JSONObject response = args.getJSONObject("player_response");
 
-		JSONObject details = response.getJSONObject("videoDetails");
-		JSONObject streamingData = response.getJSONObject("streamingData");
+		JSONObject response = JSON.parseObject(rawResponse);
+		JSONObject streamingData = response.getJSONObject(KEY_STREAMING_DATA);
+		JSONObject details = response.getJSONObject(KEY_VIDEO_DETAILS);
 
-		String jsUrl = "https://youtube.com" + config.getJSONObject("assets").getString("js");
+		String jsUrl = YOUTUBE_URL + config.getString(KEY_JS_URL);
 
 
 		Set<EncodedStream> encodedStreams = new HashSet<>();
 
-		if (streamingData.containsKey("formats")) {
-			streamingData.getJSONArray("formats").forEach(o -> parseFormat(o, encodedStreams));
+		if (streamingData.containsKey(KEY_FORMATS)) {
+			streamingData.getJSONArray(KEY_FORMATS).forEach(o -> parseFormat(o, encodedStreams));
 		}
-		if (streamingData.containsKey("adaptiveFormats")) {
-			streamingData.getJSONArray("adaptiveFormats").forEach(o -> parseFormat(o, encodedStreams));
+		if (streamingData.containsKey(KEY_ADAPTIVE_FORMATS)) {
+			streamingData.getJSONArray(KEY_ADAPTIVE_FORMATS).forEach(o -> parseFormat(o, encodedStreams));
 		}
 
-		YoutubeVideo video = new YoutubeVideo(details.getString("title"), details.getString("author"), null);
+		YoutubeVideo video = new YoutubeVideo(details.getString(KEY_TITLE), details.getString(KEY_AUTHOR), null);
 
 		encodedStreams.removeIf(target -> !target.decode(jsUrl, false));
 		encodedStreams.forEach(target -> video.getStreamOptions().add(target.getDecodedStream()));
@@ -91,5 +98,13 @@ public class HTMLDecoder implements Decoder {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private String matchAndGet(Pattern pattern, String data) {
+		Matcher matcher = pattern.matcher(data);
+		if (!matcher.find()) {
+			throw new NullPointerException("Match not found!");
+		}
+		return matcher.group(1);
 	}
 }

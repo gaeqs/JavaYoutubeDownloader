@@ -34,7 +34,7 @@ public class PlayerResponseUtils {
 			try {
 				if (obj.containsKey("cipher")) {
 					List<EncodedStream> list = new ArrayList<>();
-					EncodedStreamUtils.addEncodedStreams(URLDecoder.decode(obj.getString("cipher"), urlEncoding), list, urlEncoding);
+					EncodedStreamUtils.addEncodedStreams(URLDecoder.decode(obj.getString("signatureCipher"), urlEncoding), list, urlEncoding);
 					list.forEach(stream -> System.out.println(stream.getUrl() + "\n - " + stream.getSignature().orElse(null)));
 					streams.addAll(list);
 				}

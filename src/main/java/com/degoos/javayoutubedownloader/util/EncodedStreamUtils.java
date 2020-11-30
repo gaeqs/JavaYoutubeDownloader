@@ -57,8 +57,8 @@ public class EncodedStreamUtils {
 
 		int iTag = json.getInteger("itag");
 
-		if (json.containsKey("cipher")) {
-			String cipher = json.getString("cipher").replace("\\u0026", "&");
+		if (json.containsKey("signatureCipher")) {
+			String cipher = json.getString("signatureCipher").replace("\\u0026", "&");
 			String[] pairs = cipher.split("&");
 
 			String encodedUrl = null;
