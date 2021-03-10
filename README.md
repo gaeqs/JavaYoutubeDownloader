@@ -15,7 +15,7 @@ You can easily install JYD using maven:
     <dependency>
         <groupId>io.github.gaeqs</groupId>
         <artifactId>JavaYoutubeDownloader</artifactId>
-        <version>1.2</version>
+        <version>LATEST</version>
     </dependency>
 </dependencies>
 ```
