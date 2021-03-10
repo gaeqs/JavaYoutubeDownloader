@@ -29,7 +29,7 @@ public class HTMLDecoder implements Decoder {
 
 	private static final String YOUTUBE_URL = "https://youtube.com";
 
-	private static final Pattern YT_PLAYER_RESPONSE = Pattern.compile("<script>var ytInitialPlayerResponse = (\\{.*?});");
+	private static final Pattern YT_PLAYER_RESPONSE = Pattern.compile("var ytInitialPlayerResponse = (\\{.*?});");
 	private static final Pattern YT_PLAYER_CONFIG = Pattern.compile("ytplayer.web_player_context_config = (\\{.*?});");
 
 	private static final String KEY_STREAMING_DATA = "streamingData";

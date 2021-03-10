@@ -8,6 +8,9 @@ public interface Decrypt {
 	/**
 	 * Decrypts the signature code inside the instance.
 	 *
+	 * @param jsUrl the url of the js file containing the decrypt method.
+	 * @param signature the signature to decrypt.
+	 *
 	 * @return the decrypted code.
 	 */
 	String decrypt(String jsUrl, String signature);
