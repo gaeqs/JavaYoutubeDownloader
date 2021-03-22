@@ -140,8 +140,8 @@ public class EncodedStream {
 			return true;
 		} catch (IllegalArgumentException ex) {
 			if (JavaYoutubeDownloader.getITagMap().get(iTag) == null) {
-				if (iTag > 393 && iTag < 399) return false; //Unknown streams.
-				System.err.println("Couldn't found the StreamType for the iTag " + iTag);
+				if (iTag > 393 && iTag <= 399) return false; //Unknown streams.
+				System.err.println("Couldn't find the StreamType for the iTag " + iTag);
 			} else ex.printStackTrace();
 			return false;
 		} catch (Exception ex) {
@@ -157,8 +157,8 @@ public class EncodedStream {
 					JavaYoutubeDownloader.getITagMap().get(iTag));
 		} catch (IllegalArgumentException ex) {
 			if (JavaYoutubeDownloader.getITagMap().get(iTag) == null) {
-				if (iTag > 393 && iTag < 399) return false; //Unknown streams.
-				System.err.println("Couldn't found the StreamType for the iTag " + iTag);
+				if (iTag > 393 && iTag <= 399) return false; //Unknown streams.
+				System.err.println("Couldn't find the StreamType for the iTag " + iTag);
 			} else ex.printStackTrace();
 			return false;
 		} catch (Exception ex) {
