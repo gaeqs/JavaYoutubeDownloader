@@ -7,12 +7,12 @@ package io.github.gaeqs.javayoutubedownloader.stream.download;
  */
 public interface StreamDownloaderNotifier {
 
-	void onStart(StreamDownloader downloader);
+    void onStart(StreamDownloader downloader);
 
-	void onDownload(StreamDownloader downloader);
+    void onDownload(StreamDownloader downloader);
 
-	void onFinish(StreamDownloader downloader);
+    void onFinish(StreamDownloader downloader);
 
-	void onError(StreamDownloader downloader, Exception ex);
+    void onError(StreamDownloader downloader, Exception ex);
 
 }

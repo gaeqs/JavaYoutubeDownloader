@@ -5,6 +5,6 @@ package io.github.gaeqs.javayoutubedownloader.tag;
  */
 public enum Encoding {
 
-	H263, H264, VP8, VP9, MP4, MP3, AAC, VORBIS, OPUS, DTSE, EC_3
+    H263, H264, VP8, VP9, MP4, MP3, AAC, VORBIS, OPUS, DTSE, EC_3
 
 }

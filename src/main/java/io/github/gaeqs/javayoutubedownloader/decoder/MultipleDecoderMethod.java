@@ -9,6 +9,6 @@ import io.github.gaeqs.javayoutubedownloader.JavaYoutubeDownloader;
  */
 public enum MultipleDecoderMethod {
 
-	OR, AND
+    OR, AND
 
 }

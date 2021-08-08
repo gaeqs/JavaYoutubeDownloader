@@ -5,6 +5,6 @@ package io.github.gaeqs.javayoutubedownloader.tag;
  */
 public enum FPS {
 
-	f30, f60
+    f30, f60
 
 }

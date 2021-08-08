@@ -2,8 +2,8 @@ package io.github.gaeqs.javayoutubedownloader.decoder;
 
 import io.github.gaeqs.javayoutubedownloader.JavaYoutubeDownloader;
 import io.github.gaeqs.javayoutubedownloader.exception.HTMLExtractionException;
-import io.github.gaeqs.javayoutubedownloader.stream.YoutubeVideo;
 import io.github.gaeqs.javayoutubedownloader.stream.StreamOption;
+import io.github.gaeqs.javayoutubedownloader.stream.YoutubeVideo;
 
 import java.io.IOException;
 import java.net.URL;
@@ -19,14 +19,14 @@ import java.net.URL;
  */
 public interface Decoder {
 
-	/**
-	 * Extracts and decodes all {@link StreamOption}s for the given URL.
-	 *
-	 * @param url the url.
-	 * @return the decoded {@link YoutubeVideo} with all the {@link StreamOption} inside.
-	 * @throws IOException whether any IO exception occurs.
-	 * @throws HTMLExtractionException whether the decoder is using an HTML algorithm and an exception is thrown.
-	 */
-	YoutubeVideo extractVideo(URL url) throws IOException;
+    /**
+     * Extracts and decodes all {@link StreamOption}s for the given URL.
+     *
+     * @param url the url.
+     * @return the decoded {@link YoutubeVideo} with all the {@link StreamOption} inside.
+     * @throws IOException             whether any IO exception occurs.
+     * @throws HTMLExtractionException whether the decoder is using an HTML algorithm and an exception is thrown.
+     */
+    YoutubeVideo extractVideo(URL url) throws IOException;
 
 }

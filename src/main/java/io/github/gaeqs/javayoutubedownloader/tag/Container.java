@@ -5,6 +5,6 @@ package io.github.gaeqs.javayoutubedownloader.tag;
  */
 public enum Container {
 
-	FLV, GP3, MP4, M4A, WEBM
+    FLV, GP3, MP4, M4A, WEBM
 
 }

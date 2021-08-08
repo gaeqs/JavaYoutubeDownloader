@@ -5,6 +5,6 @@ package io.github.gaeqs.javayoutubedownloader.stream.download;
  */
 public enum DownloadStatus {
 
-	READY, DOWNLOADING, DONE
+    READY, DOWNLOADING, DONE
 
 }
